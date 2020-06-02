@@ -126,7 +126,7 @@ namespace Catfish.Core.Helpers
                 total = results.NumFound;
 
                 string query;
-
+                string sortBy = sortAscending ? "ASC" : "DESC";
                 if (total > 0)
                 {
                     IEnumerable<string> values = results.Select((r, i) => {
@@ -138,7 +138,7 @@ namespace Catfish.Core.Helpers
                     FROM (values {String.Join(",", values)}) AS x (ordering, id) 
                     JOIN [dbo].[CFXmlModels] cf 
                     ON cf.MappedGuid = x.id
-                    ORDER BY x.ordering ASC";
+                    ORDER BY x.ordering " + sortBy;
                 }
                 else
                 {
