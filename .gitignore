@@ -170,9 +170,6 @@ Plugins
 !/Catfish/Areas/Manager/Views/Build
 /Catfish/Scripts/dist/
 /Catfish/catfish-service.json
-<<<<<<< HEAD
-=======
 /.vs/Catfish/config
 /Catfish/Catfish.Local.GoogleCredentials.json
 /Catfish/catfish-GoogleCalendarServiceAccount.json
->>>>>>> 0a97cb0e4dddc318fd7ddae68078a31cc0d919ed

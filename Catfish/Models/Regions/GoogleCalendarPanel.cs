@@ -16,7 +16,8 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-
+using Piranha.Entities;
+  
 namespace Catfish.Models.Regions
 {
     [Export(typeof(IExtension))]
@@ -60,7 +61,7 @@ namespace Catfish.Models.Regions
         public GoogleCalendarPanelRenderMode RenderMode { get; set; } 
             = GoogleCalendarPanelRenderMode.Default;
 
-        public List<CalendarEvent> CalendarEvents { get; set; } = null;
+        public List<CalendarEvent> CalendarEvents { get; set; } = new List<CalendarEvent>();
 
         public string CalendarEventsJson { get; set; } = "";
 
@@ -95,15 +96,35 @@ namespace Catfish.Models.Regions
 
             if (ApiKey != null)
             {
-
-
-                var service = new CalendarService(new BaseClientService.Initializer()
+                try
                 {
-                    ApiKey = ApiKey
-                });
-
-                EventsResource.ListRequest request = service.Events.List(CalendarId);
+                
+                string[] Scopes = { CalendarService.Scope.CalendarReadonly };
+                string ApplicationName = "Google Calendar Panel";
+                string credentialFilePath = System.Configuration.ConfigurationManager.AppSettings["GoogleCredentialFilePath"];
+                string jsonFile = Path.Combine(credentialFilePath, System.Configuration.ConfigurationManager.AppSettings["GoogleCredentialFile"]);
                
+                ServiceAccountCredential credential;
+
+                    using (var stream =
+                        new FileStream(jsonFile, FileMode.Open, FileAccess.Read))
+                    {
+                        var confg = Google.Apis.Json.NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(stream);
+                        credential = new ServiceAccountCredential(
+                           new ServiceAccountCredential.Initializer(confg.ClientEmail)
+                           {
+                               Scopes = Scopes
+                           }.FromPrivateKey(confg.PrivateKey));
+                    }
+
+                    var service = new CalendarService(new BaseClientService.Initializer()
+                    {
+                        HttpClientInitializer = credential,
+                        ApplicationName = ApplicationName,
+                    });
+                 
+                EventsResource.ListRequest request = service.Events.List(CalendarId);
+
                 request.TimeMin = DateTime.Now.AddDays(DayRangePast);
                 request.TimeMax = DateTime.Now.AddDays(DayRange);
                 request.ShowDeleted = false;
@@ -115,6 +136,10 @@ namespace Catfish.Models.Regions
                 CalendarEvents = events.Items.Select(m => new CalendarEvent(m)).ToList();
                 CalendarEventsJson = JsonConvert.SerializeObject(CalendarEvents);
                 //EventsJson = JsonConvert.SerializeObject(Events);
+               }
+                catch (Exception ex)
+                {
+                }
             }
 
             return base.GetContent(model);
