@@ -1,4 +1,6 @@
-﻿/**
+﻿import draggable from 'vuedraggable';
+
+/**
  * Javascript Vue code for creating the item layout in ItemList.cshtml.
  * It is modelled after the file piranha.pagelist.js in Piranha's source code.
  */
@@ -11,6 +13,9 @@
 if (document.getElementById("itemlist-page")) {
     piranha.itemlist = new Vue({
         el: '#itemlist-page',
+        components: {
+            draggable,
+        },
         data() {
             return {
                 loading: true,
@@ -33,7 +38,27 @@ if (document.getElementById("itemlist-page")) {
                  * 2 = true, all are closed
                 */
                 collapseAll: 2,
-                mixedStateLeans: true
+                mixedStateLeans: true,
+
+                //test data
+                myArray: [
+                    {
+                        id: 0,
+                        name: "Jill"
+                    },
+                    {
+                        id: 1,
+                        name: "Zuko"
+                    },
+                    {
+                        id: 2,
+                        name: "Bumi"
+                    },
+                    {
+                        id: 3,
+                        name: "Aang"
+					}
+                ]
             }
         },
         methods: {

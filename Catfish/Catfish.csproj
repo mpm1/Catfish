@@ -54,6 +54,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\assets\dist\bundle.js" />
+    <None Include="wwwroot\assets\dist\bundle.js.map" />
+    <None Include="wwwroot\assets\dist\vendors.bundle.js" />
+    <None Include="wwwroot\assets\dist\vendors.bundle.js.map" />
     <None Include="wwwroot\assets\js\entitytypelist.js" />
     <None Include="wwwroot\assets\js\textarea-field.js" />
   </ItemGroup>
