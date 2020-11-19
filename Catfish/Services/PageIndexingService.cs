@@ -38,7 +38,7 @@ namespace Catfish.Services
         }
 
         protected void IndexBlock(Block block, SolrEntry entry)
-        {
+        {  
             if (block == null || entry == null)
                 return;
 
@@ -73,7 +73,7 @@ namespace Catfish.Services
             //then we index its Url
             if (typeof(ImageBlock).IsAssignableFrom(block.GetType()))
             {
-                string text = (block as ImageBlock).Body.Media.PublicUrl;
+                string text = (block as ImageBlock).Body.Media.PublicUrl.TrimStart('~');
                 if (!string.IsNullOrWhiteSpace(text))
                     entry.AddImage(block.Id, text);
             }
