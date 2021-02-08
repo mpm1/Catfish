@@ -1829,16 +1829,19 @@ namespace Catfish.UnitTests
                .AppendContent("div", @"<i>For each student to be hired, click 'Add' and indicate whether the student will be an undergraduate, MA, or PhD student, and specify the period for which they will be hired, the number of hours to be worked, and related calculations.
                      Applicants are expected to adhere to the Collective Agreement when calculating salaries for graduate students. Research budgets for casual student labour must reflect the minimum rate (award + salary + benefits)
                     for Doctoral and Masters students.</i>", lang);
-            //Allow adding multiple PersonnelBudgetItem Form == TODO
+       
             // DataItem personnelBudgetForm = CreatePersonnelBudgetForm(template)
+            CompositeField pBudgetForm = sasForm.CreateField<CompositeField>("Estimate for Hiring Students", lang, false);
+            pBudgetForm = CreatePersonnelBudgetItemForm(pBudgetForm);
 
-
+            
             sasForm.CreateField<InfoSection>(null, null)
                .AppendContent("h3", "Estimates for Contracted Services", lang)
                .AppendContent("div", @"For each contracted service, click 'Add' and then provide the requested information. Please describe the services to be provided. Note that you must also attach written estimates for all contracted services. Estimates should be combined into one single PDF document.", lang);
 
             //Allow adding multiple PersonnelBudgetItem Form TODO
-            // DataItem personnelBudgetForm = CreatePersonnelBudgetForm(template)
+            CompositeField contracServiceForm = sasForm.CreateField<CompositeField>("Estimates for Contracted Services", lang, false);
+            contracServiceForm = CreatePersonnelBudgetItemForm(contracServiceForm);
 
             sasForm.CreateField<AttachmentField>("Contractor Cost Estimates", lang).SetDescription(@"<i>Attach written estimate for contracted services as <span style='color: Red;'> <b>single PDF document</b></i>.<br/>
 [Required if funding requested for professional services]</span>", lang);
@@ -1859,6 +1862,10 @@ namespace Catfish.UnitTests
 
             // allow to add 1 or more Personnel budget Item Form here TODO
             // DataItem personnelBudgetForm = CreatePersonnelBudgetForm(template)
+            CompositeField equipmentForm = sasForm.CreateField<CompositeField>("Estimates for Equipment and Material", lang, false);
+            equipmentForm = CreatePersonnelBudgetItemForm(equipmentForm);
+
+
             sasForm.CreateField<AttachmentField>("Vendor Cost Estimates", lang).SetDescription(@"<i>Please submit documentation as a <span style='color: Red;'> <b>single PDF document</b></i>.<br/>
 [Required if funding requested for equipment and materials]</span>", lang);
 
@@ -1869,10 +1876,15 @@ namespace Catfish.UnitTests
             sasForm.CreateField<InfoSection>(null, null)
             .AppendContent("h5", "1st Term", lang);
             //TODO: add sub Form here
+            CompositeField firstTermTR = sasForm.CreateField<CompositeField>("1st Term", lang, false);
+            firstTermTR = CreateTeachingReleaseForm(firstTermTR);
+
 
             sasForm.CreateField<InfoSection>(null, null)
            .AppendContent("h5", "2nd Term", lang);
             //TODO: add sub Form here
+            CompositeField secTermTR = sasForm.CreateField<CompositeField>("2st Term", lang, false);
+            secTermTR = CreateTeachingReleaseForm(secTermTR);
 
             sasForm.CreateField<TextArea>("Justification", lang)
                 .SetDescription("<i>Explain why release time is urgent and necessary at this moment. Maximum 250 words.</i>", lang);
@@ -1915,7 +1927,8 @@ namespace Catfish.UnitTests
           .AppendContent("h3", "Collaborators", lang)
           .AppendContent("div", "Required only if collaborator is a Faculty of Arts faculty member.", lang,"alert alert-info");
             // TO DO -- Add Collaborator(s) below
-
+            CompositeField collaborator = sasForm.CreateField<CompositeField>("Collaborators", lang, false);
+            collaborator = CreateCollaboratorForm(collaborator);
             //================================================ Submit form ===============================
             sasForm.CreateField<InfoSection>(null, null)
                 .AppendContent("div", @"<h1>Save or Submit Your Application</h1>
@@ -1995,38 +2008,46 @@ namespace Catfish.UnitTests
             // File.WriteAllText("..\\..\\..\\..\\Examples\\SASform_generared.json", json);
         }
 
-        private DataItem CreatePersonnelBudgetItemForm(ItemTemplate template)
+        private CompositeField CreatePersonnelBudgetItemForm(CompositeField compField)
         {
             string lang = "en";
-            DataItem pBudgetForm = template.GetDataItem("Personnel Budget Item", true, lang);
-            pBudgetForm.IsRoot = false;
-            pBudgetForm.SetDescription("Personnel Budget Item Form", lang);
-            pBudgetForm.CreateField<TextArea>("Provide details and calculations as specified above", lang, true);
-            pBudgetForm.CreateField<DecimalField>("Estimate Cost", lang, true);
-            return pBudgetForm;
+
+            // CompositeField pBudgetForm = dataItem.CreateField<CompositeField>("Estimate for Hiring Students", lang, false);
+
+            compField.CreateChildTemplate("Personnel Budget Item", "Author information", lang);
+            compField.ChildTemplate.CreateField<TextArea>("Provide details and calculations as specified above", lang, false);
+            compField.ChildTemplate.CreateField<DecimalField>("Estimate Cost", lang, false);
+            compField.Min = 0;
+            compField.Max = 100;
+            compField.AllowMultipleValues = true;
+            return compField;
         }
 
-        private DataItem CreateTeachingReleaseForm(ItemTemplate template)
+        private CompositeField CreateTeachingReleaseForm(CompositeField tRelease)
         {
             string lang = "en";
             string[] optionText = new string[] { "Yes", "No" };
-          
-            DataItem courseReleaseForm = template.GetDataItem("Course Release Form", true, lang);
-            courseReleaseForm.IsRoot = false;
-            courseReleaseForm.CreateField<TextField>("Couse Name", lang, true);
-            courseReleaseForm.CreateField<RadioField>("Release Required?", lang, optionText, true);
-          
-            courseReleaseForm.CreateField<DecimalField>("Amount Requested ($)", lang, true);
-            return courseReleaseForm;
+            tRelease.CreateChildTemplate("Teaching Release Form", "Author information", lang);
+            tRelease.ChildTemplate.CreateField<TextField>("Course Name", lang, false);
+            tRelease.ChildTemplate.CreateField<RadioField>("Release Required",lang,optionText,false);
+            tRelease.ChildTemplate.CreateField<DecimalField>("Amount Requested($)", lang, false);
+            tRelease.Min = 0;
+            tRelease.Max = 4;
+            tRelease.AllowMultipleValues = true;
+            return tRelease;
         }
-        private DataItem CreateCollaboratorForm(ItemTemplate template)
+        private CompositeField CreateCollaboratorForm(CompositeField collaboratorForm)
         {
             string lang = "en";
+            collaboratorForm.CreateChildTemplate("Collaborator", "Collaborator information", lang);
+          
             
-            DataItem collaboratorForm = template.GetDataItem("Collaborator Information", true, lang);
-            collaboratorForm.IsRoot = false;
-            collaboratorForm.CreateField<TextField>("Full Name", lang, true);
-            collaboratorForm.CreateField<TextField>("Email Address", lang, true);
+            collaboratorForm.ChildTemplate.CreateField<TextField>("Full Name", lang, false);
+            collaboratorForm.ChildTemplate.CreateField<TextField>("Email Address", lang, false);
+            collaboratorForm.Min = 0;
+            collaboratorForm.Max = 100;
+            collaboratorForm.AllowMultipleValues = true;
+
             return collaboratorForm;
         }
 
