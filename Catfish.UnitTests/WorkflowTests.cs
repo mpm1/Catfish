@@ -1632,13 +1632,25 @@ namespace Catfish.UnitTests
             //Get the Workflow object using the workflow service
             Workflow workflow = ws.GetWorkflow(true);
 
-            //Defininig states
+            //Defininig  SAS states
+            //Started Saved In Review Review Complete In Adjudication Approved Declined Deleted
+          
+            //
             State emptyState = workflow.AddState(ws.GetStatus(template.Id, "", true));
-            State submittedState = workflow.AddState(ws.GetStatus(template.Id, "Submitted", true));
+            State startedState = workflow.AddState(ws.GetStatus(template.Id, "Started", true));
+            State savedState = workflow.AddState(ws.GetStatus(template.Id, "Saved", true));
+           
+            State inReviewState = workflow.AddState(ws.GetStatus(template.Id, "In Review", true));
+            State reviewCompleteState = workflow.AddState(ws.GetStatus(template.Id, "Review Complete", true));
+            State inAdjudicationState = workflow.AddState(ws.GetStatus(template.Id, "In Adjudication", true));
+            State approvedState = workflow.AddState(ws.GetStatus(template.Id, "Approved", true));
+            State declineState = workflow.AddState(ws.GetStatus(template.Id, "Declined", true));
+            State submittedState = workflow.AddState(ws.GetStatus(template.Id, "Submitted", true)); //not in old SAS 
             State deleteState = workflow.AddState(ws.GetStatus(template.Id, "Deleted", true));
 
 
             //Defining email templates
+
             EmailTemplate adminNotification = ws.GetEmailTemplate("Admin Notification", true);
             adminNotification.SetDescription("This metadata set defines the email template to be sent to the admin when an inspector does not submit an inspection report timely.", lang);
             adminNotification.SetSubject("Safety Inspection Submission");
@@ -2307,6 +2319,274 @@ namespace Catfish.UnitTests
           //  string json = JsonConvert.SerializeObject(template);
           //  File.WriteAllText("..\\..\\..\\..\\Examples\\compositeFormFieldTest_generared.json", json);
         }
+        [Test]
+        public void GapConferenceFundTest()
+        {
+            string lang = "en";
+            string templateName = "Faculty of Arts Conference Fund Winter 2021";
+
+            IWorkflowService ws = _testHelper.WorkflowService;
+            AppDbContext db = _testHelper.Db;
+            IAuthorizationService auth = _testHelper.AuthorizationService;
+
+
+            ItemTemplate template = db.ItemTemplates
+                .Where(et => et.TemplateName == templateName)
+                .FirstOrDefault();
+
+            if (template == null)
+            {
+                template = new ItemTemplate();
+                db.ItemTemplates.Add(template);
+            }
+            else
+            {
+                ItemTemplate t = new ItemTemplate();
+                t.Id = template.Id;
+                template.Data = t.Data;
+                template.Initialize(false);
+            }
+            template.TemplateName = templateName;
+            template.Name.SetContent(templateName);
+
+            ws.SetModel(template);
+
+            //Get the Workflow object using the workflow service
+            Workflow workflow = ws.GetWorkflow(true);
+
+            //Defininig  SAS states
+            //Started
+            //Saved
+            //In Review
+            //Review Complete
+            //In Adjudication
+            //Approved
+            //Declined
+            //Deleted
+            State emptyState = workflow.AddState(ws.GetStatus(template.Id, "", true));
+            State startedState = workflow.AddState(ws.GetStatus(template.Id, "Started", true));
+            State savedState = workflow.AddState(ws.GetStatus(template.Id, "Saved", true));
+
+            State inReviewState = workflow.AddState(ws.GetStatus(template.Id, "In Review", true));
+            State reviewCompleteState = workflow.AddState(ws.GetStatus(template.Id, "Review Complete", true));
+            State inAdjudicationState = workflow.AddState(ws.GetStatus(template.Id, "In Adjudication", true));
+            State approvedState = workflow.AddState(ws.GetStatus(template.Id, "Approved", true));
+            State declineState = workflow.AddState(ws.GetStatus(template.Id, "Declined", true));
+            State submittedState = workflow.AddState(ws.GetStatus(template.Id, "Submitted", true)); //not in old SAS 
+            State deleteState = workflow.AddState(ws.GetStatus(template.Id, "Deleted", true));
+
+
+            //Defining email templates
+
+            EmailTemplate adminNotification = ws.GetEmailTemplate("Admin Notification", true);
+            adminNotification.SetDescription("This metadata set defines the email template to be sent to the admin when an inspector does not submit an inspection report timely.", lang);
+            adminNotification.SetSubject("Safety Inspection Submission");
+            adminNotification.SetBody("TBD");
+
+            EmailTemplate inspectorSubmissionNotification = ws.GetEmailTemplate("Inspector Notification", true);
+            inspectorSubmissionNotification.SetDescription("This metadata set defines the email template to be sent to an inspector when an inspection report is not submitted timely.", lang);
+            inspectorSubmissionNotification.SetSubject("Safety Inspection Reminder");
+            inspectorSubmissionNotification.SetBody("TBD");
+
+            //=============================================================================== Defininig SAS form
+            DataItem conferenceForm = template.GetDataItem("Conference Fund Fall 2021", true, lang);
+            conferenceForm.IsRoot = true;
+            conferenceForm.SetDescription("This template is designed for Faculty of Arts Conference Fund Application", lang);
+
+            // ====================================================== HOST INFORMATION
+            conferenceForm.CreateField<InfoSection>(null, null)
+                .AppendContent("h1", "Host", lang);
+           
+            conferenceForm.CreateField<TextField>("Applicant Name:", lang, true, true);
+            conferenceForm.CreateField<TextField>("Email Address:", lang, true, true)
+                .SetDescription("Please use your UAlberta CCID email address.", lang);
+
+            string[] departmentList = new string[] { "Anthropology",
+                                                "Art & Design",
+                                                "Drama",
+                                                "East Asian Studies",
+                                                "Economics",
+                                                "English and Film Studies",
+                                                "History and Classics",
+                                                "Linguistics",
+                                                "Modern Languages and Cultural Studies (MLCS)",
+                                                "Music",
+                                                "Philosophy",
+                                                "Political Science",
+                                                "Psychology",
+                                                "Sociology",
+                                                "Women's and Gender Studies",
+                                                "Media and Technology Studies",
+                                                "Arts Resources Centre" };
+            var dept = conferenceForm.CreateField<SelectField>("Department:", lang, departmentList, true);
+            string[] applicantCategory = new string[]{ "Faculty",
+                                "Student"};
+
+            var applicantCat = conferenceForm.CreateField<SelectField>("Applicant Category:", lang, applicantCategory, true);
+
+            //this only visible if applicant category is "Faculty"
+            string[] optionText = new string[] { "Yes", "No" };
+            var isChair = (OptionsField)conferenceForm.CreateField<RadioField>("Are you the Department Chair?", lang, optionText, false).SetVisibleIf(applicantCat, applicantCategory[0]);
+            //if department Chair  -- the chair will be the dean
+            //the order of the department chair list have to be in the same order of the list Department above
+            // the first one is the Dean ==> no association with the department -- exception
+            string[] chairDept = new string[] { "Dean: Steve Patten : spatten@ualberta.ca",
+                                                "Anthropology : Pamela Willoughby: pwilloug @ualberta.ca",
+                                                "Art & Design : Aidan Rowe: rowe1@ualberta.ca",
+                                                "Drama: Melanie Dreyer-Lude : dreyerlu@ualberta.ca",
+                                                "East Asian Studies: Christopher Lupke: lupke@ualberta.ca",
+                                                 "Economics : Rick Szostak: rszostak@ualberta.ca",
+                                                 "English and Film Studies: Cecily Devereux: devereux@ualberta.ca",
+                                                 "History and Classics : Ryan Dunch: rdunch@ualberta.ca",
+                                                 "Linguistics: Herb Colston: colston@ualberta.ca",
+                                                 "Modern Languages and Cultural Studies (MLCS): Alla Nedashkiviska: allan@ualberta.ca",
+                                                 "Music: Patricia Tao: ptao@ualberta.ca",
+                                                 "Philosophy: Marie-Eve Morin: mmorin1@ualberta.ca",
+                                                 "Political Science: Catherine Kellogg: ckellogg@ualberta.ca",
+                                                 "Psychology: Anthony Singhal: asinghal@ualberta.ca",
+                                                 "Sociology: Sara Dorow: sdorow@ualberta.ca",
+                                                 "Women's and Gender Studies: Michelle Meagher: mmmeaghe@ualberta.ca",
+                                                 "Media and Technology Studies: Astrid Ensslin: ensslin@ualberta.ca",
+                                                 "Arts Resources Centre: arcAdmin : kamal@ranaweera.ca" };
+
+            string optValues = "1," + optionText[0] + "," + "&&"; //index  => of the fields in the list of 1st input parameter of SetOptionIf -- this refer to "isChair" radioButtonList, 
+                                                                  //optionText[0] ==> option value that is to trigger the operator if the list of fields are more than 1
+
+
+            var chair = conferenceForm.CreateField<SelectField>("Chair:", lang, chairDept, true).SetOptionIf(new List<OptionsField> { dept, isChair }, chairDept, optValues);//chairDept =>string[]
+
+            string delimiter = ":";
+
+            conferenceForm.CreateField<TextField>("Chair's Name:", lang, true, true).SetDefaultReferenceValue(chair, delimiter, 1);
+            conferenceForm.CreateField<TextField>("Chair's Email:", lang, true, true).SetDefaultReferenceValue(chair, delimiter, 2);
+
+            //========================================================================CONFERENCE INFO
+
+            conferenceForm.CreateField<InfoSection>(null, null)
+                .AppendContent("h1", "Conference Information", lang);
+
+            conferenceForm.CreateField<TextField>("Short Title:", lang, true).SetDescription("Short Title of Conference, Symposium, or Colloquia:", lang);
+            conferenceForm.CreateField<TextField>("Location:", lang, true).SetDescription("Must be in Alberta:", lang);
+            conferenceForm.CreateField<DateField>("Start Date:", lang, true);
+            conferenceForm.CreateField<DateField>("End Date:", lang, true);
+            conferenceForm.CreateField<TextField>("Sponsor:", lang, true).SetDescription("What is the sponsoring organization?", lang);
+            conferenceForm.CreateField<RadioField>("Is this a regularly held conference?", lang, optionText, true);
+            // TO DO --- WAIT for TABLE FIELD --
+            //label: Past Occurrences, Desc:Where have the last 3 occurrences of this conference been held?
+
+            conferenceForm.CreateField<TextArea>("Conference Description:", lang, true, true).SetDescription("Describe your conference and explain the nature, purpose, and importance of the conference, topics to be addressed at the conference, relation to UAlberta, role of trainees, how the Faculty of Arts will be recognized, and how these conference funds will be used to support your activities and enhance your conference. (Maximum 250 words)", lang);
+
+
+            //========================================================================ANTICIPATE ATTENDEES
+            conferenceForm.CreateField<InfoSection>(null, null)
+               .AppendContent("h1", "Anticipated Attendance", lang);
+
+            // TO DO -- NEED TABLE FIELD
+            //============================================================================ OTHER FUNDING INFO
+            conferenceForm.CreateField<InfoSection>(null, null)
+             .AppendContent("h1", "Other Funding Support For This Conference ", lang)
+             .AppendContent("div", "<i>(Provide details of other funding applied for and/or confirmed.)</i>",lang);
+
+            // TO DO -- NEED TABLE FIELD
+
+            //============================================================================ ESTIMATED CPNFERENCE BUDGET
+            conferenceForm.CreateField<InfoSection>(null, null)
+             .AppendContent("h1", "ESTIMATED CONFERENCE BUDGET", lang)
+             .AppendContent("div", "<i>(Please add more lines if necessary)</i>", lang);
+
+            // TO DO -- NEED TABLE FIELD
+            //============================================================================ FUNDING REQUESTED
+            conferenceForm.CreateField<InfoSection>(null, null)
+             .AppendContent("h1", "FUNDING REQUESTED:", lang)
+             .AppendContent("div", @"<ul><li>Full Conference Fund Grants - <b>Up to $2,000:</b> Full Conference Fund grants are for conferences, symposia, or colloquia held on campus or in Edmonton</li>
+                                   <li>Partial Conference Fund Grants - <b>Up to $1,000:</b> Partial Conference Fund grants are for conferences, symposia, or colloquia with three or fewer speakers for one day or less, particularly those focused on a single theme and targeted to a modest, essentially local audience.</li></ul>", lang);
+
+            conferenceForm.CreateField<DecimalField>("Please enter the amount requested from the Faculty of Arts Conference Fund: ($):", lang,false);
+
+            
+            conferenceForm.CreateField<AttachmentField>("Supporting Documentation", lang).SetDescription(@"<div>Any existing call for proposals, draft program, or other such documents must be attached to this application as supporting documentation.
+All required supporting documentation must be <span style='color:Red;'>combined into a single PDF</span> and submitted here.</div>", lang);
+
+           
+            //================================================ Submit form ===============================
+            conferenceForm.CreateField<InfoSection>(null, null)
+                .AppendContent("div", @"<h1>Save or Submit Your Application</h1>
+                                       <div>To complete the application later, please click on the Save button below. You will be given a randomly generated reference number for which you need to submit a password. You can retrieve 
+                                      the application using this reference number and the password and complete it later. Unfortunately if you misplace the reference number or forget the password, 
+                                       you will have to start over a new application.</div>
+
+                                      <div>If you have completed your application, please use the Submit button below. Submitted applications cannot be modified. 
+                                            <span style='color: Red'>If your submission is successful, you should get a confirmation email</span>. Please check for this email <span style='color:Red'>before</span> you close your browser. 
+                                If you don't see the email, <span style='color: Red'>your application may not have been submitted</span>, so please contact Nancie Hodgson, Research Coordinator (resarts@ualberta.ca).</div>", lang, "alert alert-info");
+
+            //=============================================================================             Defininig roles
+            WorkflowRole adminRole = workflow.AddRole(auth.GetRole("Admin", true));
+            WorkflowRole inspectorRole = workflow.AddRole(auth.GetRole("Inspector", true));
+            WorkflowRole chairRole = workflow.AddRole(auth.GetRole("Chair", true));
+
+            // Submitting an inspection form
+            //Only safey inspectors can submit this form
+            GetAction startSubmissionAction = workflow.AddAction("Start Submission", nameof(TemplateOperations.Instantiate), "Home");
+            startSubmissionAction.Access = GetAction.eAccess.Restricted;
+            startSubmissionAction.AddStateReferances(emptyState.Id)
+                .AddAuthorizedRole(inspectorRole.Id);
+
+            //Listing inspection forms.
+            //Inspectors can list their own submissions.
+            //Admins can list all submissions.
+            GetAction listSubmissionsAction = workflow.AddAction("List Submissions", nameof(TemplateOperations.ListInstances), "Home");
+            listSubmissionsAction.Access = GetAction.eAccess.Restricted;
+            listSubmissionsAction.AddStateReferances(submittedState.Id)
+                .AddOwnerAuthorization()
+                .AddAuthorizedRole(adminRole.Id);
+
+
+            //Post action for submitting the form
+            PostAction submitPostAction = startSubmissionAction.AddPostAction("Submit", nameof(TemplateOperations.Update));
+            submitPostAction.AddStateMapping(emptyState.Id, submittedState.Id, "Submit");
+
+            //Defining the pop-up for the above submitPostAction action
+            PopUp submitActionPopUp = submitPostAction.AddPopUp("WARNING: Submitting the Form", "Once submitted, you cannot update the form.", "");
+            submitActionPopUp.AddButtons("Yes, submit", "true");
+            submitActionPopUp.AddButtons("Cancel", "false");
+
+            // Edit submission related workflow items
+            //Defining actions
+            GetAction editSubmissionAction = workflow.AddAction("Edit Submission", "Edit", "Details");
+
+            //Submissions can only be edited by admins
+            editSubmissionAction.AddStateReferances(submittedState.Id)
+                .AddAuthorizedRole(adminRole.Id);
+
+            //Defining post actions
+            PostAction editPostActionSave = editSubmissionAction.AddPostAction("Save", "Save");
+            editPostActionSave.AddStateMapping(submittedState.Id, submittedState.Id, "Save");
+
+
+            // Delete submission related workflow items
+            //Defining actions. Only admin can delete a submission
+            GetAction deleteSubmissionAction = workflow.AddAction("Delete Submission", "Delete", "Details");
+            deleteSubmissionAction.AddStateReferances(submittedState.Id)
+                .AddAuthorizedRole(adminRole.Id);
+
+            //Defining post actions
+            PostAction deleteSubmissionPostAction = deleteSubmissionAction.AddPostAction("Delete", "Save");
+            deleteSubmissionPostAction.AddStateMapping(submittedState.Id, deleteState.Id, "Delete");
+
+            //Defining the pop-up for the above postActionSubmit action
+            PopUp deleteSubmissionActionPopUpopUp = deleteSubmissionPostAction.AddPopUp("WARNING: Delete", "Deleting the submission. Please confirm.", "");
+            deleteSubmissionActionPopUpopUp.AddButtons("Yes, delete", "true");
+            deleteSubmissionActionPopUpopUp.AddButtons("Cancel", "false");
+
+
+            db.SaveChanges();
+
+            template.Data.Save("..\\..\\..\\..\\Examples\\ConferenceFundform_generared.xml");
+
+            // string json = JsonConvert.SerializeObject(template);
+            // File.WriteAllText("..\\..\\..\\..\\Examples\\SASform_generared.json", json);
+        }
+
 
         [Test]
         public void TestEntityTemplateLoad()
