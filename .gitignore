@@ -200,3 +200,5 @@ Plugins
 /Examples/compositeFormFieldTest_generared.xml
 /Examples/AttachmentTest_generared.xml
 /Catfish.Test/appsettings.test.json
+.sonarqube
+/SonarQubeCommands.txt
