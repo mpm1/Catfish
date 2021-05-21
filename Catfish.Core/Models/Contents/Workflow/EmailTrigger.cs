@@ -14,6 +14,7 @@ namespace Catfish.Core.Models.Contents.Workflow
     {
         public XmlModelList<EmailRecipient> Recipients { get; set; }
         public XmlModelList<EmailTemplateReference> Templates { get; set; }
+        public XmlModelList<Reminder> Reminders { get; set; }
         public EmailTrigger(XElement data)
             : base(data)
         {
@@ -31,6 +32,7 @@ namespace Catfish.Core.Models.Contents.Workflow
 
             Recipients = new XmlModelList<EmailRecipient>(GetElement("recipients", true));
             Templates = new XmlModelList<EmailTemplateReference>(GetElement("email-templates", true));
+            Reminders = new XmlModelList<Reminder>(GetElement("reminders", true));
         }
 
 
@@ -88,6 +90,16 @@ namespace Catfish.Core.Models.Contents.Workflow
             EmailTemplateReference newRef = new EmailTemplateReference() { RefId = emailTemplateId };
             Templates.Add(newRef);
             return newRef;
+        }
+
+        public Reminder AddReminder(string name, string timePeriod, bool repeat)
+        {
+            if (Reminders.Where(r => r.Name == name).Any())
+                throw new Exception(string.Format("Reminder {0} already exists.", name));
+
+            Reminder newnotify = new Reminder() { Name =name, Period = timePeriod, Repeat = repeat };
+            Reminders.Add(newnotify);
+            return newnotify;
         }
 
         public override bool Execute(EntityTemplate template, Item item,TriggerRef triggerRef, IServiceProvider serviceProvider)

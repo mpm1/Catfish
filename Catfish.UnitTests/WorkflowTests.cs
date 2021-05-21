@@ -297,6 +297,7 @@ namespace Catfish.UnitTests
             EmailTrigger RevisionNotificationEmailTrigger = workflow.AddTrigger("ToOwnerOnDocumentRevision", "SendEmail");
             RevisionNotificationEmailTrigger.AddOwnerAsRecipient();
             RevisionNotificationEmailTrigger.AddTemplate(revisionNotification.Id, "Owner's revision-notification");
+            RevisionNotificationEmailTrigger.AddReminder("Revision reminder", "7", true);
 
             EmailTrigger MovedToDraftCalendarEmailTrigger = workflow.AddTrigger("ToOwnerOnMovedToDraftCalendar", "SendEmail");
             MovedToDraftCalendarEmailTrigger.AddOwnerAsRecipient();

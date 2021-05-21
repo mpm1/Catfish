@@ -20,7 +20,7 @@ namespace Catfish.UnitTests
             //Paramters 
             Guid itemId = Guid.NewGuid();
             Guid supportingDocTemplateId = Guid.NewGuid();
-            string reviewerEmail = "someone@example.com";
+            string reviewerEmail = "iwickram@ualberta.ca";
             DateTime deadline = DateTime.Now.AddSeconds(5);
             BackgroundJob.Schedule<ISupportingDocumentReminder>(
                 x => x.CheckDocumentReceipt(itemId, supportingDocTemplateId, reviewerEmail, deadline),
