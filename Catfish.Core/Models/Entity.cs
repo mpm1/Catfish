@@ -19,6 +19,7 @@ namespace Catfish.Core.Models
         public static readonly string Tag = "entity";
         public static readonly string MetadataSetsRootTag = "metadata-sets";
         public static readonly string ReportsRootTag = "reports";
+        public static readonly string TimersRootTag = "timers";
         public static readonly string AuditTrailRootTag = "audit-trail";
         public static readonly string DataContainerRootTag = "data-container";
 
@@ -94,6 +95,8 @@ namespace Catfish.Core.Models
         [NotMapped]
         public XmlModelList<BaseReport> Reports { get; protected set; }
 
+        [NotMapped]
+        public XmlModelList<Timer> Timers { get; protected set; }
 
         [NotMapped]
         public XmlModelList<AuditEntry> AuditTrail { get; protected set; }
@@ -180,6 +183,10 @@ namespace Catfish.Core.Models
 
             //Building the report list
             Reports = new XmlModelList<BaseReport>(xml.GetElement(ReportsRootTag, true), true);
+
+            //Building the Audit Trail Set list
+            Timers = new XmlModelList<Timer>(xml.GetElement(TimersRootTag, true), true);
+
             //Building the Audit Trail Set list
             AuditTrail = new XmlModelList<AuditEntry>(xml.GetElement(AuditTrailRootTag, true), true);
 
@@ -270,6 +277,20 @@ namespace Catfish.Core.Models
                 .FirstOrDefault();
         }
 
+        public Timer AddTimer(string name, Guid childTemplateId, string requestDate, string deadline, string documentOwner)
+        {
+            if (Timers.Where(r => r.Name == name).Any())
+                throw new Exception(string.Format("Reminder {0} already exists.", name));
+
+            Timer timer = new Timer() { Name = name, 
+                                        ChildTemplateId = childTemplateId, 
+                                        RequestDate = requestDate,
+                                        Deadline = deadline,
+                                        DocumentOwner = documentOwner
+            };
+            Timers.Add(timer);
+            return timer;
+        }
 
         public Entity AddAuditEntry(Guid? userId, Guid statusFrom, Guid statusTo, string action)
         {

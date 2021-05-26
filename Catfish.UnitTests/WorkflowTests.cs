@@ -176,6 +176,7 @@ namespace Catfish.UnitTests
             template.TemplateName = templateName;
             template.Name.SetContent(templateName);
 
+            template.AddTimer("Weekly Reminder", Guid.NewGuid(), DateTime.Now.ToString(), DateTime.Now.AddSeconds(5).ToString(), "Isuru");
             //ws.SetModel(template);
 
             //Get the Workflow object using the workflow service
