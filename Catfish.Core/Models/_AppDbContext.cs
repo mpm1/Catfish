@@ -140,7 +140,6 @@ namespace Catfish.Core.Models
         public DbSet<GroupTemplate> GroupTemplates { get; set; }
         public DbSet<SystemStatus> SystemStatuses { get; set; }
         public DbSet<Form> Forms { get; set; }
-        public DbSet<BackgroundJob> BackgroundJobs { get; set; }
         public DbSet<Backup> Backups { get; set; }
         public DbSet<IndexingHistory> IndexingHistory { get; set; }
 
