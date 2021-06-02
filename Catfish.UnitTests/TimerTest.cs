@@ -1,4 +1,6 @@
-﻿using Catfish.Core.Services.Timers;
+﻿using Catfish.Core.Models;
+using Catfish.Core.Services.Timers;
+using Catfish.Test.Helpers;
 using Hangfire;
 using NUnit.Framework;
 using System;
@@ -9,6 +11,15 @@ namespace Catfish.UnitTests
 {
     public class TimerTest
     {
+        private protected AppDbContext _db;
+        private protected TestHelper _testHelper;
+
+        [SetUp]
+        public void Setup()
+        {
+            _testHelper = new TestHelper();
+            _db = _testHelper.Db;
+        }
 
         [Test]
         public void SupportingDocumentReceiveCheck()
@@ -26,6 +37,12 @@ namespace Catfish.UnitTests
             BackgroundJob.Schedule<ISupportingDocumentReminder>(
                 x => x.CheckDocumentReceipt(itemId, supportingDocTemplateId,name,  reviewerEmail, deadline),
                 deadline.Subtract(DateTime.Now));
+        }
+
+        [Test]
+        public void HangfireTest()
+        {
+
         }
     }
 }
