@@ -21,6 +21,7 @@ using System.Xml.Linq;
 using System.IO;
 using System.Linq;
 using Catfish.Helper;
+using Hangfire;
 
 namespace Catfish.Test.Helpers
 {
@@ -96,6 +97,18 @@ namespace Catfish.Test.Helpers
             //Creating a service provider and assigning it to the member variable so that it can be used by 
             //test methods.
             Seviceprovider = services.BuildServiceProvider();
+            //services.AddHangfire(configuration => configuration
+            //.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            //.UseSimpleAssemblyNameTypeSerializer()
+            //.UseRecommendedSerializerSettings()
+            //.UseSqlServerStorage("Server=-; Database=-; user=-; password=-;"));
+
+            services.AddHangfire(x => x
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(Configuration.GetConnectionString("catfish")));
+            services.AddHangfireServer();
         }
 
         public AppDbContext Db => Seviceprovider.GetService<AppDbContext>();

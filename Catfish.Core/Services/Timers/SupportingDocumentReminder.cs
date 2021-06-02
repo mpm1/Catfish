@@ -1,4 +1,5 @@
 ﻿using Catfish.Core.Models;
+using Catfish.Core.Models.Contents;
 using Catfish.Services;
 using ElmahCore;
 using System;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Catfish.Core.Services.Timer
+namespace Catfish.Core.Services.Timers
 {
     public class SupportingDocumentReminder : ISupportingDocumentReminder
     {
@@ -18,12 +19,12 @@ namespace Catfish.Core.Services.Timer
             _db = db;
             _errorLog = errorLog;
         }
-        public Task CheckDocumentReceipt(Guid parentItemId, Guid supportingDocTemplateId, string senderEmail, DateTime deadline)
+        public void CheckDocumentReceipt(Guid parentItemId, Guid supportingDocTemplateId, string name, string senderEmail, DateTime deadline)
         {
             var item = _db.Items.Where(i => i.Id == parentItemId).FirstOrDefault();
-            var entityTemplate = _db.EntityTemplates.Where(it => it.TemplateId == item.TemplateId).FirstOrDefault();
-
-            throw new NotImplementedException();
+            item.AddTimer(name, supportingDocTemplateId, DateTime.Now, deadline, senderEmail, false);
+            _db.SaveChanges();
+            //return item;
         }
     }
 }

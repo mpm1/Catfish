@@ -3,10 +3,12 @@ using Catfish.Core.Models.Contents.Data;
 using Catfish.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Hangfire;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using Catfish.Core.Services.Timers;
 
 namespace Catfish.Core.Models.Contents.Workflow
 {
@@ -92,12 +94,12 @@ namespace Catfish.Core.Models.Contents.Workflow
             return newRef;
         }
 
-        public Reminder AddReminder(string name, string timePeriod, bool repeat)
+        public Reminder AddReminder(string name, string timePeriod, bool repeat, bool inherit)
         {
             if (Reminders.Where(r => r.Name == name).Any())
                 throw new Exception(string.Format("Reminder {0} already exists.", name));
 
-            Reminder newnotify = new Reminder() { Name =name, Period = timePeriod, Repeat = repeat };
+            Reminder newnotify = new Reminder() { Name =name, Period = timePeriod, Repeat = repeat, InheritRecipients =inherit };
             Reminders.Add(newnotify);
             return newnotify;
         }
@@ -138,8 +140,8 @@ namespace Catfish.Core.Models.Contents.Workflow
             //  * recipient's email (which includes a role identified within the workflow)
             //  * owner
             //  * by the content of a field in a data-item
+            var reminder = selectedTrigger.Reminders.FirstOrDefault();
             var recipients = selectedTrigger.Recipients.ToList();
-
             //add recipient to the content
             foreach (var recipient in recipients)
             {
@@ -170,8 +172,27 @@ namespace Catfish.Core.Models.Contents.Workflow
                 {
                     emailRecipients.Add(recipient.Email);
                 }
+
+                var deadline = DateTime.Now.AddDays(Double.Parse(reminder.Period));
+
+                if (reminder.InheritRecipients)
+                {
+                        BackgroundJob.Schedule<ISupportingDocumentReminder>(
+                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.Name, recipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period))),
+                        deadline.Subtract(DateTime.Now));
+                }
+
+                var additionalRecipients = reminder.AdditionalRecipients;
+
+                foreach(var additionalRecipient in additionalRecipients)
+                {
+                    BackgroundJob.Schedule<ISupportingDocumentReminder>(
+                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.Name, additionalRecipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period))),
+                        deadline.Subtract(DateTime.Now));
+                }
+                   
                 //send email using email service
-                foreach(var emailRecipient in emailRecipients)
+                foreach (var emailRecipient in emailRecipients)
                     SendEmail(emailMessage, emailRecipient, emailService, workflowService, config);
             }
 

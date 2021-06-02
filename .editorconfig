@@ -32,3 +32,6 @@ dotnet_diagnostic.CA1822.severity = none
 
 # Default severity for analyzer diagnostics with category 'Globalization'
 dotnet_analyzer_diagnostic.category-Globalization.severity = none
+
+# CS0108: Member hides inherited member; missing new keyword
+dotnet_diagnostic.CS0108.severity = none

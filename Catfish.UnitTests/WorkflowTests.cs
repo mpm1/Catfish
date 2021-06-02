@@ -176,7 +176,7 @@ namespace Catfish.UnitTests
             template.TemplateName = templateName;
             template.Name.SetContent(templateName);
 
-            template.AddTimer("Weekly Reminder", Guid.NewGuid(), DateTime.Now.ToString(), DateTime.Now.AddSeconds(5).ToString(), "Isuru");
+            template.AddTimer("Weekly Reminder", Guid.NewGuid(), DateTime.Now, DateTime.Now.AddSeconds(5), "Isuru", false);
             //ws.SetModel(template);
 
             //Get the Workflow object using the workflow service
@@ -298,7 +298,8 @@ namespace Catfish.UnitTests
             EmailTrigger RevisionNotificationEmailTrigger = workflow.AddTrigger("ToOwnerOnDocumentRevision", "SendEmail");
             RevisionNotificationEmailTrigger.AddOwnerAsRecipient();
             RevisionNotificationEmailTrigger.AddTemplate(revisionNotification.Id, "Owner's revision-notification");
-            RevisionNotificationEmailTrigger.AddReminder("Revision reminder", "7", true);
+            Reminder RevisionNotificationEmailTriggerReminder = RevisionNotificationEmailTrigger.AddReminder("Revision reminder", "7", true, true);
+            RevisionNotificationEmailTriggerReminder.AddRecipientByEmail("isurupmw@ualberta.ca");
 
             EmailTrigger MovedToDraftCalendarEmailTrigger = workflow.AddTrigger("ToOwnerOnMovedToDraftCalendar", "SendEmail");
             MovedToDraftCalendarEmailTrigger.AddOwnerAsRecipient();

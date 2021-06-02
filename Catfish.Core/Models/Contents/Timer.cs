@@ -19,6 +19,8 @@ namespace Catfish.Core.Models.Contents
 
         public static readonly string DocOwnerAtt = "supporting-doc-owner";
 
+        public static readonly string ExecuteAtt = "executed";
+
         public string Name
         {
             get => Data.Attribute(NameAtt).Value;
@@ -29,14 +31,14 @@ namespace Catfish.Core.Models.Contents
             get => GetAttribute(ChildTemplateAtt, null as Guid?);
             set => Data.SetAttributeValue(ChildTemplateAtt, value);
         }
-        public string RequestDate
+        public DateTime RequestDate
         {
-            get => Data.Attribute(RequestDateAtt).Value;
+            get => GetDateTimeAttribute(RequestDateAtt).Value;
             set => Data.SetAttributeValue(RequestDateAtt, value);
         }
-        public string Deadline
+        public DateTime Deadline
         {
-            get => Data.Attribute(DeadlineAtt).Value;
+            get => GetDateTimeAttribute(DeadlineAtt).Value;
             set => Data.SetAttributeValue(DeadlineAtt, value);
         }
         public string DocumentOwner
@@ -44,6 +46,12 @@ namespace Catfish.Core.Models.Contents
             get => Data.Attribute(DocOwnerAtt).Value;
             set => Data.SetAttributeValue(DocOwnerAtt, value);
         }
+        public bool Executed
+        {
+            get => GetAttribute(ExecuteAtt, false);
+            set => Data.SetAttributeValue(ExecuteAtt, value);
+        }
+
         public Timer(XElement data)
             : base(data)
         {
@@ -55,5 +63,11 @@ namespace Catfish.Core.Models.Contents
         {
 
         }
+        public DateTime? GetDateTimeAttribute(string key)
+        {
+            var att = Data.Attribute(key);
+            return (att == null || string.IsNullOrEmpty(att.Value)) ? null as DateTime? : DateTime.Parse(att.Value);
+        }
+
     }
 }
