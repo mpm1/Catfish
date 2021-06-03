@@ -14,6 +14,7 @@ namespace Catfish.Core.Services.Timers
     {
         private readonly AppDbContext _db;
         private readonly ErrorLog _errorLog;
+
         public SupportingDocumentReminder(AppDbContext db, ErrorLog errorLog)
         {
             _db = db;
@@ -25,6 +26,13 @@ namespace Catfish.Core.Services.Timers
             item.AddTimer(name, supportingDocTemplateId, DateTime.Now, deadline, senderEmail, false);
             _db.SaveChanges();
             //return item;
+        }
+
+        public void HangfireTest()
+        {
+            string filename = "c:\\HangfireTest.txt";
+            System.IO.File.WriteAllText(filename, DateTime.Now.ToString());
+            System.IO.File.AppendAllText(filename, _db == null ? "DB Null" : "DB NOT NULL");
         }
     }
 }

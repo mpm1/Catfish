@@ -22,6 +22,9 @@ using System.IO;
 using System.Linq;
 using Catfish.Helper;
 using Hangfire;
+using Catfish.Core.Services.Timers;
+using Hangfire.SqlServer;
+using Catfish.Core.Infrastructure;
 
 namespace Catfish.Test.Helpers
 {
@@ -93,22 +96,30 @@ namespace Catfish.Test.Helpers
             services.AddScoped<ErrorLog, MockupErrorLog>();
 
             services.AddScoped<IJobService, JobService>();
+            
+            services.AddScoped<ISupportingDocumentReminder, SupportingDocumentReminder>();
 
             //Creating a service provider and assigning it to the member variable so that it can be used by 
             //test methods.
             Seviceprovider = services.BuildServiceProvider();
+            GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(Seviceprovider));
+
             //services.AddHangfire(configuration => configuration
             //.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
             //.UseSimpleAssemblyNameTypeSerializer()
             //.UseRecommendedSerializerSettings()
             //.UseSqlServerStorage("Server=-; Database=-; user=-; password=-;"));
 
+            var catfishConnectionString = Configuration.GetConnectionString("catfish");
             services.AddHangfire(x => x
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
-            .UseSqlServerStorage(Configuration.GetConnectionString("catfish")));
+            .UseSqlServerStorage(catfishConnectionString));
             services.AddHangfireServer();
+
+            var sqlStorage = new SqlServerStorage(catfishConnectionString);
+            JobStorage.Current = sqlStorage;
         }
 
         public AppDbContext Db => Seviceprovider.GetService<AppDbContext>();
@@ -118,7 +129,8 @@ namespace Catfish.Test.Helpers
         public IConfiguration Configuration => Seviceprovider.GetService<IConfiguration>();
         public ISolrService SolrService => Seviceprovider.GetService<ISolrService>();
         public ISolrBatchService SolrBatchService => Seviceprovider.GetService<ISolrBatchService>();
-       
+        public ISupportingDocumentReminder SupportingDocumentReminder => Seviceprovider.GetService<ISupportingDocumentReminder>();
+
         public XElement LoadXml(string fileName)
         {
             string dataRoot = Configuration.GetSection("SchemaPath").Value;

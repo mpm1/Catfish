@@ -42,6 +42,9 @@ namespace Catfish.UnitTests
         [Test]
         public void HangfireTest()
         {
+            var offset = DateTimeOffset.Now.AddSeconds(5);
+            //BackgroundJob.Schedule<ISupportingDocumentReminder>(x => x.HangfireTest(), offset);
+            BackgroundJob.Schedule<SupportingDocumentReminder>(x => x.HangfireTest(), offset);
 
         }
     }

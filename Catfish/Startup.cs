@@ -15,6 +15,7 @@ using Catfish.Services;
 using ElmahCore;
 using ElmahCore.Mvc;
 using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -193,6 +194,8 @@ namespace Catfish
             //HangFire background processing service
             services.AddHangfire(x => x.UseSqlServerStorage(Configuration.GetConnectionString("catfish")));
             services.AddHangfireServer();
+            var sqlStorage = new SqlServerStorage(Configuration.GetConnectionString("catfish"));
+            JobStorage.Current = sqlStorage;
 
             //ELMAH Error Logger
             services.AddElmah<XmlFileErrorLog>(options =>
@@ -308,6 +311,8 @@ namespace Catfish
                     pattern: "{controller=Home}/{action=Index}/{id?}");
 
                 endpoints.MapPiranhaManager();
+
+                endpoints.MapHangfireDashboard();
             });
 
             AddPartialViews();
