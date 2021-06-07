@@ -56,6 +56,6 @@ namespace Catfish.Core.Services
         Mapping GetStateMappingByStateMappingId(EntityTemplate entityTemplate, Guid stateMappingId);
 
         bool UpdateItemTemplateSchema(Guid id, string SchemaXml, out string successMessage);
-        void AddTimer(Item item, string name, Guid childTemplateId, DateTime requestedDate, DateTime deadline, string documentOwner, bool executed);
+        void AddTimer(Item item, string name, Guid emailTemplateId, Guid childDocumentTemplateId, DateTime requestedDate, DateTime deadline, string documentOwner);
     }
 }

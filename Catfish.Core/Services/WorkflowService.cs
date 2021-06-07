@@ -738,9 +738,9 @@ namespace Catfish.Core.Services
             }
         }
 
-        public void AddTimer(Item item, string name, Guid childTemplateId, DateTime requestedDate, DateTime deadline, string documentOwner, bool executed)
+        public void AddTimer(Item item, string name, Guid emailTemplateId, Guid childDocumentTemplateId, DateTime requestedDate, DateTime deadline, string documentOwner)
         {
-            item.AddTimer(name, childTemplateId, requestedDate, deadline, documentOwner, executed);
+            item.AddTimer(name, emailTemplateId, childDocumentTemplateId, requestedDate, deadline, documentOwner);
             _db.SaveChanges();
         }
     }

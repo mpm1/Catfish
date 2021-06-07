@@ -34,6 +34,15 @@ namespace Catfish.Core.Helpers
             }
         }
 
+        public static string StmpEmail
+        {
+            get
+            {
+                string val = Configuration.GetSection("EmailServer:Email").Value;
+                return string.IsNullOrEmpty(val) ? null : val.TrimEnd('/');
+            }
+        }
+
         public static string GetUploadTempFolder(bool createIfNotExist = false)
         {
             string path = Path.Combine(UploadRoot, "temp");

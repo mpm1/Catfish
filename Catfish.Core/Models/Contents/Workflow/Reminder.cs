@@ -14,6 +14,8 @@ namespace Catfish.Core.Models.Contents.Workflow
 
         public static readonly string PeriodAtt = "period";
 
+        public static readonly string ChildFormTemplateAtt = "child-form-template-id";
+
         public static readonly string RepeatAtt = "repeat";
         
         public static readonly string InheritAtt = "inherit";
@@ -24,6 +26,11 @@ namespace Catfish.Core.Models.Contents.Workflow
         {
             get => Data.Attribute(NameAtt).Value;
             set => Data.SetAttributeValue(NameAtt, value);
+        }
+        public Guid ChildFormTemplateId
+        {
+            get => Guid.Parse(Data.Attribute(ChildFormTemplateAtt).Value);
+            set => Data.SetAttributeValue(ChildFormTemplateAtt, value);
         }
         public string Period
         {

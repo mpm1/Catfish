@@ -13,6 +13,8 @@ namespace Catfish.Core.Models.Contents
 
         public static readonly string ChildTemplateAtt = "child-template-id";
 
+        public static readonly string EmailTemplateAtt = "email-template-id";
+
         public static readonly string RequestDateAtt = "request-date";
 
         public static readonly string DeadlineAtt = "deadline";
@@ -26,10 +28,15 @@ namespace Catfish.Core.Models.Contents
             get => Data.Attribute(NameAtt).Value;
             set => Data.SetAttributeValue(NameAtt, value);
         }
-        public Guid? ChildTemplateId
+        public Guid? ChildDocumentTemplateId
         {
             get => GetAttribute(ChildTemplateAtt, null as Guid?);
             set => Data.SetAttributeValue(ChildTemplateAtt, value);
+        }
+        public Guid? EmailTemplateId
+        {
+            get => GetAttribute(EmailTemplateAtt, null as Guid?);
+            set => Data.SetAttributeValue(EmailTemplateAtt, value);
         }
         public DateTime RequestDate
         {
@@ -46,11 +53,7 @@ namespace Catfish.Core.Models.Contents
             get => Data.Attribute(DocOwnerAtt).Value;
             set => Data.SetAttributeValue(DocOwnerAtt, value);
         }
-        public bool Executed
-        {
-            get => GetAttribute(ExecuteAtt, false);
-            set => Data.SetAttributeValue(ExecuteAtt, value);
-        }
+        
 
         public Timer(XElement data)
             : base(data)

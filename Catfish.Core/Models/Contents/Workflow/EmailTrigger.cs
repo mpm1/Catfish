@@ -94,12 +94,12 @@ namespace Catfish.Core.Models.Contents.Workflow
             return newRef;
         }
 
-        public Reminder AddReminder(string name, string timePeriod, bool repeat, bool inherit)
+        public Reminder AddReminder(string name,Guid childFormTemplateId, string timePeriod, bool repeat, bool inherit)
         {
-            if (Reminders.Where(r => r.Name == name).Any())
+            if (Reminders.Where(r => r.Name == name && r.ChildFormTemplateId == childFormTemplateId).Any())
                 throw new Exception(string.Format("Reminder {0} already exists.", name));
 
-            Reminder newnotify = new Reminder() { Name =name, Period = timePeriod, Repeat = repeat, InheritRecipients =inherit };
+            Reminder newnotify = new Reminder() { Name =name, ChildFormTemplateId = childFormTemplateId, Period = timePeriod, Repeat = repeat, InheritRecipients =inherit };
             Reminders.Add(newnotify);
             return newnotify;
         }
@@ -177,8 +177,9 @@ namespace Catfish.Core.Models.Contents.Workflow
 
                 if (reminder.InheritRecipients)
                 {
-                        BackgroundJob.Schedule<ISupportingDocumentReminder>(
-                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.Name, recipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period))),
+                    workflowService.AddTimer(item, selectedTrigger.Name, emailReferanceId, reminder.ChildFormTemplateId, DateTime.Now, deadline, recipient.Email);
+                    BackgroundJob.Schedule<ISupportingDocumentReminder>(
+                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.ChildFormTemplateId,selectedTrigger.Name, recipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period))),
                         deadline.Subtract(DateTime.Now));
                 }
 
@@ -186,8 +187,9 @@ namespace Catfish.Core.Models.Contents.Workflow
 
                 foreach(var additionalRecipient in additionalRecipients)
                 {
+                    workflowService.AddTimer(item, selectedTrigger.Name, emailReferanceId, reminder.ChildFormTemplateId, DateTime.Now, deadline, additionalRecipient.Email);
                     BackgroundJob.Schedule<ISupportingDocumentReminder>(
-                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.Name, additionalRecipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period))),
+                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.ChildFormTemplateId, reminder.Name, additionalRecipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period))),
                         deadline.Subtract(DateTime.Now));
                 }
                    

@@ -277,17 +277,17 @@ namespace Catfish.Core.Models
                 .FirstOrDefault();
         }
 
-        public Timer AddTimer(string name, Guid childTemplateId, DateTime requestDate, DateTime deadline, string documentOwner, bool executed)
+        public Timer AddTimer(string name, Guid emailTemplateId, Guid childDocumentTemplateId, DateTime requestDate, DateTime deadline, string documentOwner)
         {
             if (Timers.Where(r => r.DocumentOwner == documentOwner).Any())
                 throw new Exception(string.Format("Reminder for {0} already exists.", name));
 
             Timer timer = new Timer() { Name = name, 
-                                        ChildTemplateId = childTemplateId, 
+                                        EmailTemplateId = emailTemplateId,
+                                        ChildDocumentTemplateId = childDocumentTemplateId, 
                                         RequestDate = requestDate,
                                         Deadline = deadline,
-                                        DocumentOwner = documentOwner,
-                                        Executed= executed
+                                        DocumentOwner = documentOwner
             };
             Timers.Add(timer);
             return timer;

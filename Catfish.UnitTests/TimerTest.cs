@@ -30,13 +30,15 @@ namespace Catfish.UnitTests
 
             //Paramters 
             Guid itemId = Guid.Parse("6D07649B-125F-47B8-A142-387A4C9ADE34");
-            Guid supportingDocTemplateId = Guid.Parse("c234bc7d-891e-4b9c-94c2-861f3496a171");
+            Guid supportingDocTemplateId = Guid.Parse("111e2c81-70a9-4483-81f0-8e89ed2bf07a");
+            Guid EmailTemplate = Guid.Parse("b2547544-c22a-456e-9133-0bc6636c6ad3");
             string reviewerEmail = "iwickram@ualberta.ca";
             string name = "daily email reminder";
             DateTime deadline = DateTime.Now.AddSeconds(5);
+            var offset = DateTimeOffset.Now.AddSeconds(5);
             BackgroundJob.Schedule<ISupportingDocumentReminder>(
-                x => x.CheckDocumentReceipt(itemId, supportingDocTemplateId,name,  reviewerEmail, deadline),
-                deadline.Subtract(DateTime.Now));
+                x => x.CheckDocumentReceipt(itemId, EmailTemplate, supportingDocTemplateId, name,  reviewerEmail, deadline),
+                offset);
         }
 
         [Test]
