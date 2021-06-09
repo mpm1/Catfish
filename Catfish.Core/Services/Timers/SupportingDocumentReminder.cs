@@ -4,6 +4,8 @@ using Catfish.Core.Models.Contents;
 using Catfish.Core.Models.Contents.Workflow;
 using Catfish.Services;
 using ElmahCore;
+using Hangfire;
+using Hangfire.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,13 +25,14 @@ namespace Catfish.Core.Services.Timers
             _errorLog = errorLog;
             _emailService = emailService;
         }
-        public void CheckDocumentReceipt(Guid parentItemId, Guid emailTemplateId, Guid supportingDocTemplateId, string name, string senderEmail, DateTime deadline)
+        public Task CheckDocumentReceipt(Guid parentItemId, Guid emailTemplateId, Guid supportingDocTemplateId, string name, string senderEmail, DateTime deadline, PerformContext context)
         {
+            string jobId = context.BackgroundJob.Id;
             var item = _db.Items.Where(i => i.Id == parentItemId).FirstOrDefault();
             EntityTemplate entityTemplate = _db.EntityTemplates.Where(et => et.Id == item.TemplateId).FirstOrDefault();
             var timers = item.Timers.ToList();
             string lang = "en";
-            bool isChildFormSubmitted = item.DataContainer.Where(dc => dc.TemplateId == supportingDocTemplateId).Any();
+            bool isChildFormSubmitted = item.DataContainer.Where(dc => dc.TemplateId== supportingDocTemplateId).Any();
             foreach (var timer in timers)
             {
                 if(timer.Deadline > DateTime.Now && isChildFormSubmitted == false)
@@ -60,15 +63,19 @@ namespace Catfish.Core.Services.Timers
                     email.Body = emailMessage.GetBody();
                     _emailService.SendEmail(email);
                 }
+                else
+                {
+                    RecurringJob.RemoveIfExists(jobId);
+                }
             }
             //item.AddTimer(name, supportingDocTemplateId, DateTime.Now, deadline, senderEmail, false);
             _db.SaveChanges();
-            //return item;
+            return Task.CompletedTask;
         }
 
         public void HangfireTest()
         {
-            string filename = "c:\\HangfireTest.txt";
+            string filename = "c:\\Test\\HangfireTest.txt";
             System.IO.File.WriteAllText(filename, DateTime.Now.ToString());
             System.IO.File.AppendAllText(filename, _db == null ? "DB Null" : "DB NOT NULL");
         }

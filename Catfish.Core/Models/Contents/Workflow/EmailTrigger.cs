@@ -178,9 +178,9 @@ namespace Catfish.Core.Models.Contents.Workflow
                 if (reminder.InheritRecipients)
                 {
                     workflowService.AddTimer(item, selectedTrigger.Name, emailReferanceId, reminder.ChildFormTemplateId, DateTime.Now, deadline, recipient.Email);
-                    BackgroundJob.Schedule<ISupportingDocumentReminder>(
-                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.ChildFormTemplateId,selectedTrigger.Name, recipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period))),
-                        deadline.Subtract(DateTime.Now));
+                    RecurringJob.AddOrUpdate<ISupportingDocumentReminder>(
+                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.ChildFormTemplateId,selectedTrigger.Name, recipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period)),null),
+                        Cron.DayInterval(int.Parse(reminder.Period)));
                 }
 
                 var additionalRecipients = reminder.AdditionalRecipients;
@@ -188,9 +188,9 @@ namespace Catfish.Core.Models.Contents.Workflow
                 foreach(var additionalRecipient in additionalRecipients)
                 {
                     workflowService.AddTimer(item, selectedTrigger.Name, emailReferanceId, reminder.ChildFormTemplateId, DateTime.Now, deadline, additionalRecipient.Email);
-                    BackgroundJob.Schedule<ISupportingDocumentReminder>(
-                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.ChildFormTemplateId, reminder.Name, additionalRecipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period))),
-                        deadline.Subtract(DateTime.Now));
+                    RecurringJob.AddOrUpdate<ISupportingDocumentReminder>(
+                        x => x.CheckDocumentReceipt(item.Id, emailReferanceId, reminder.ChildFormTemplateId, reminder.Name, additionalRecipient.Email, DateTime.Now.AddDays(Double.Parse(reminder.Period)),null),
+                         Cron.DayInterval(int.Parse(reminder.Period)));
                 }
                    
                 //send email using email service

@@ -2,6 +2,7 @@
 using Catfish.Core.Services.Timers;
 using Catfish.Test.Helpers;
 using Hangfire;
+using Hangfire.Common;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -36,9 +37,13 @@ namespace Catfish.UnitTests
             string name = "daily email reminder";
             DateTime deadline = DateTime.Now.AddSeconds(5);
             var offset = DateTimeOffset.Now.AddSeconds(5);
-            BackgroundJob.Schedule<ISupportingDocumentReminder>(
-                x => x.CheckDocumentReceipt(itemId, EmailTemplate, supportingDocTemplateId, name,  reviewerEmail, deadline),
-                offset);
+            //BackgroundJob.Schedule<SupportingDocumentReminder>(
+            //    x => x.CheckDocumentReceipt(itemId, EmailTemplate, supportingDocTemplateId, name,  reviewerEmail, deadline, null),
+            //    offset);
+            RecurringJob.AddOrUpdate<SupportingDocumentReminder>(
+                x => x.CheckDocumentReceipt(itemId, EmailTemplate, supportingDocTemplateId, name, reviewerEmail, deadline, null),
+                Cron.Minutely);
+
         }
 
         [Test]
@@ -46,7 +51,7 @@ namespace Catfish.UnitTests
         {
             var offset = DateTimeOffset.Now.AddSeconds(5);
             //BackgroundJob.Schedule<ISupportingDocumentReminder>(x => x.HangfireTest(), offset);
-            BackgroundJob.Schedule<SupportingDocumentReminder>(x => x.HangfireTest(), offset);
+            RecurringJob.AddOrUpdate<SupportingDocumentReminder>(x => x.HangfireTest(), Cron.Minutely);
 
         }
     }
